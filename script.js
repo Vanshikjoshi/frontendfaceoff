@@ -1,301 +1,310 @@
-javascript
 /* =========================================================
-   03TOON TIME - Interactive JavaScript
-   ========================================================= */
+   03TOON TIME
+   MAIN JAVASCRIPT
+========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================================
-       1. MOBILE MENU
-       ===================================================== */
+       MOBILE MENU
+    ===================================================== */
 
     const menuBtn = document.querySelector(".menu-btn");
-    const navbar = document.querySelector(".navbar");
     const navLinks = document.querySelector(".nav-links");
 
     if (menuBtn && navLinks) {
-        const mobileMenu = document.createElement("div");
-        mobileMenu.className = "mobile-menu";
-
-        mobileMenu.innerHTML = `
-    < div class="mobile-menu-inner" >
-        ${navLinks.innerHTML}
-            </div >
-    `;
-
-        navbar.appendChild(mobileMenu);
 
         menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("show");
-            menuBtn.textContent = mobileMenu.classList.contains("show")
-                ? "✕"
-                : "☰";
+
+            let mobileMenu = document.querySelector(".mobile-menu");
+
+            if (!mobileMenu) {
+
+                mobileMenu = document.createElement("div");
+                mobileMenu.className = "mobile-menu";
+
+                mobileMenu.innerHTML = `
+                    <a href="#home">Home</a>
+                    <a href="#shows">Shows</a>
+                    <a href="#characters">Characters</a>
+                    <a href="#episodes">Episodes</a>
+                    <a href="#games">Games</a>
+                    <a href="#about">About</a>
+                `;
+
+                document.querySelector(".navbar").appendChild(mobileMenu);
+
+                mobileMenu.querySelectorAll("a").forEach(link => {
+
+                    link.addEventListener("click", () => {
+                        mobileMenu.remove();
+                    });
+
+                });
+
+            } else {
+
+                mobileMenu.remove();
+
+            }
+
         });
 
-        mobileMenu.querySelectorAll("a").forEach(link => {
-            link.addEventListener("click", () => {
-                mobileMenu.classList.remove("show");
-                menuBtn.textContent = "☰";
-            });
-        });
     }
 
 
     /* =====================================================
-       2. ACTIVE NAVIGATION LINK
-       ===================================================== */
-
-    const allNavLinks = document.querySelectorAll(
-        ".nav-links a, .mobile-menu a"
-    );
-
-    allNavLinks.forEach(link => {
-        link.addEventListener("click", () => {
-
-            allNavLinks.forEach(item => {
-                item.classList.remove("active");
-            });
-
-            link.classList.add("active");
-        });
-    });
-
-
-    /* =====================================================
-       3. SMOOTH SCROLLING
-       ===================================================== */
+       SMOOTH SCROLLING
+    ===================================================== */
 
     document.querySelectorAll('a[href^="#"]').forEach(link => {
 
-        link.addEventListener("click", function (event) {
+        link.addEventListener("click", function (e) {
 
             const targetId = this.getAttribute("href");
 
-            if (
-                !targetId ||
-                targetId === "#" ||
-                targetId.length <= 1
-            ) {
-                return;
-            }
+            if (targetId === "#") return;
 
             const target = document.querySelector(targetId);
 
             if (target) {
-                event.preventDefault();
+
+                e.preventDefault();
 
                 target.scrollIntoView({
                     behavior: "smooth",
                     block: "start"
                 });
+
             }
+
         });
+
     });
 
 
     /* =====================================================
-       4. EPISODE FILTER
-       ===================================================== */
+       EPISODE FILTERS
+    ===================================================== */
 
-    const filterButtons = document.querySelectorAll(".filter");
+    const filterButtons = document.querySelectorAll(".episode-filters .filter");
     const episodeCards = document.querySelectorAll(".episode-card");
 
     filterButtons.forEach(button => {
 
         button.addEventListener("click", () => {
 
+            /* Remove active from every button */
             filterButtons.forEach(btn => {
                 btn.classList.remove("active");
             });
 
+            /* Add active to clicked button */
             button.classList.add("active");
 
-            const selectedShow = button.textContent.trim();
+            const selectedShow = button.textContent
+                .trim()
+                .toLowerCase();
 
             episodeCards.forEach(card => {
 
-                const showNameElement = card.querySelector(
-                    ".episode-info .show"
-                );
+                const showNameElement =
+                    card.querySelector(".episode-info small");
 
-                const showName = showNameElement
-                    ? showNameElement.textContent.trim()
-                    : "";
+                if (!showNameElement) return;
 
-                if (
-                    selectedShow === "All" ||
-                    showName === selectedShow
-                ) {
+                const showName = showNameElement.textContent
+                    .trim()
+                    .toLowerCase();
+
+                /* ALL */
+                if (selectedShow === "all") {
+
                     card.style.display = "";
-                    card.style.animation = "fadeIn 0.4s ease";
-                } else {
-                    card.style.display = "none";
+
                 }
+
+                /* SKYBOUND ACADEMY */
+                else if (
+                    selectedShow === "skybound academy" &&
+                    showName === "skybound academy"
+                ) {
+
+                    card.style.display = "";
+
+                }
+
+                /* FOREST GUARDIANS */
+                else if (
+                    selectedShow === "forest guardians" &&
+                    showName === "forest guardians"
+                ) {
+
+                    card.style.display = "";
+
+                }
+
+                /* PROJECT NEXT GEN */
+                else if (
+                    selectedShow === "project next gen" &&
+                    showName === "project next gen"
+                ) {
+
+                    card.style.display = "";
+
+                }
+
+                /* OTHERWISE HIDE */
+                else {
+
+                    card.style.display = "none";
+
+                }
+
             });
+
         });
+
     });
 
 
     /* =====================================================
-       5. EPISODE / SHOW PLAY MODAL
-       ===================================================== */
+       SHOW PLAY BUTTONS
+    ===================================================== */
 
-    const modal = document.createElement("div");
+    const showPlayButtons = document.querySelectorAll(".show-play");
 
-    modal.className = "toon-modal";
+    showPlayButtons.forEach(button => {
 
-    modal.innerHTML = `
-    < div class="toon-modal-overlay" ></div >
+        button.addEventListener("click", () => {
 
-        <div class="toon-modal-box">
+            const card = button.closest(".show-card");
 
-            <button class="modal-close" aria-label="Close">
-                ✕
-            </button>
+            if (!card) return;
 
-            <div class="modal-icon">
-                ▶
+            const title = card.querySelector("h3")?.textContent.trim();
+
+            openWatchModal(title || "03TOON TIME");
+
+        });
+
+    });
+
+
+    /* =====================================================
+       EPISODE PLAY BUTTONS
+    ===================================================== */
+
+    const episodePlayButtons =
+        document.querySelectorAll(".episode-play");
+
+    episodePlayButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const card = button.closest(".episode-card");
+
+            if (!card) return;
+
+            const title =
+                card.querySelector("h3")?.textContent.trim();
+
+            const show =
+                card.querySelector("small")?.textContent.trim();
+
+            openWatchModal(
+                `${show || "03TOON TIME"} — ${title || "Episode"}`
+            );
+
+        });
+
+    });
+
+
+    /* =====================================================
+       WATCH MODAL
+    ===================================================== */
+
+    function openWatchModal(title) {
+
+        closeModal();
+
+        const modal = document.createElement("div");
+
+        modal.className = "toon-modal";
+
+        modal.innerHTML = `
+            <div class="toon-modal-overlay"></div>
+
+            <div class="toon-modal-box">
+
+                <button class="toon-modal-close">
+                    ×
+                </button>
+
+                <div class="toon-modal-icon">
+                    ▶
+                </div>
+
+                <span>03TOON TIME</span>
+
+                <h2>${title}</h2>
+
+                <p>
+                    Your adventure is about to begin!
+                </p>
+
+                <button class="toon-watch-button">
+                    ▶ Watch Now
+                </button>
+
             </div>
+        `;
 
-            <span class="modal-label">
-                03TOON TIME
-            </span>
-
-            <h2 class="modal-title">
-                Adventure Loading...
-            </h2>
-
-            <p class="modal-description">
-                Get ready for another amazing adventure!
-            </p>
-
-            <button class="modal-watch">
-                ▶ START WATCHING
-            </button>
-
-        </div>
-`;
-
-    document.body.appendChild(modal);
-
-
-    const modalTitle = modal.querySelector(".modal-title");
-    const modalDescription = modal.querySelector(".modal-description");
-    const modalClose = modal.querySelector(".modal-close");
-    const modalOverlay = modal.querySelector(".toon-modal-overlay");
-    const modalWatch = modal.querySelector(".modal-watch");
-
-
-    function openModal(title, description) {
-
-        modalTitle.textContent = title;
-        modalDescription.textContent = description;
-
-        modal.classList.add("show");
+        document.body.appendChild(modal);
 
         document.body.style.overflow = "hidden";
+
+        modal
+            .querySelector(".toon-modal-close")
+            .addEventListener("click", closeModal);
+
+        modal
+            .querySelector(".toon-modal-overlay")
+            .addEventListener("click", closeModal);
+
+        modal
+            .querySelector(".toon-watch-button")
+            .addEventListener("click", () => {
+
+                alert(
+                    "Coming soon! This episode will be available here."
+                );
+
+            });
+
     }
 
 
     function closeModal() {
 
-        modal.classList.remove("show");
+        const modal = document.querySelector(".toon-modal");
+
+        if (modal) {
+            modal.remove();
+        }
 
         document.body.style.overflow = "";
+
     }
 
 
-    modalClose.addEventListener("click", closeModal);
-    modalOverlay.addEventListener("click", closeModal);
-
-
-    document.addEventListener("keydown", event => {
-
-        if (event.key === "Escape") {
-            closeModal();
-        }
-
-    });
-
-
     /* =====================================================
-       6. SHOW PLAY BUTTONS
-       ===================================================== */
+       CHARACTER CARDS
+    ===================================================== */
 
-    const showCards = document.querySelectorAll(".show-card");
-
-    showCards.forEach(card => {
-
-        const playButton = card.querySelector(".show-play");
-        const titleElement = card.querySelector("h3");
-
-        if (playButton && titleElement) {
-
-            playButton.addEventListener("click", event => {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                const title = titleElement.textContent.trim();
-
-                openModal(
-                    title,
-                    `You're about to enter ${title}. Your next cartoon adventure is ready!`
-                );
-            });
-        }
-    });
-
-
-    /* =====================================================
-       7. EPISODE PLAY BUTTONS
-       ===================================================== */
-
-    episodeCards.forEach(card => {
-
-        const playButton = card.querySelector(".episode-play");
-        const titleElement = card.querySelector("h3");
-
-        if (playButton && titleElement) {
-
-            playButton.addEventListener("click", event => {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                const title = titleElement.textContent.trim();
-
-                openModal(
-                    title,
-                    "This episode is ready to play. Grab your snacks and enjoy the adventure!"
-                );
-            });
-        }
-    });
-
-
-    /* =====================================================
-       8. MODAL WATCH BUTTON
-       ===================================================== */
-
-    modalWatch.addEventListener("click", () => {
-
-        modalWatch.textContent = "COMING SOON ✦";
-
-        setTimeout(() => {
-            modalWatch.textContent = "▶ START WATCHING";
-        }, 1800);
-
-    });
-
-
-    /* =====================================================
-       9. CHARACTER CARDS INTERACTION
-       ===================================================== */
-
-    const characterCards = document.querySelectorAll(
-        ".character-card"
-    );
+    const characterCards =
+        document.querySelectorAll(".character-card");
 
     characterCards.forEach(card => {
 
@@ -313,27 +322,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       10. CHARACTER CAROUSEL ARROWS
-       ===================================================== */
+       CHARACTER CAROUSEL
+    ===================================================== */
 
-    const characterGrid = document.querySelector(
-        ".characters-grid"
-    );
+    const characterGrid =
+        document.querySelector(".characters-grid");
 
-    const previousButton = document.querySelector(
-        ".character-prev"
-    );
+    const prevButton =
+        document.querySelector(".character-prev");
 
-    const nextButton = document.querySelector(
-        ".character-next"
-    );
+    const nextButton =
+        document.querySelector(".character-next");
 
-
-    if (
-        characterGrid &&
-        previousButton &&
-        nextButton
-    ) {
+    if (characterGrid && prevButton && nextButton) {
 
         nextButton.addEventListener("click", () => {
 
@@ -344,8 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         });
 
-
-        previousButton.addEventListener("click", () => {
+        prevButton.addEventListener("click", () => {
 
             characterGrid.scrollBy({
                 left: -300,
@@ -358,61 +358,139 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       11. SEARCH BUTTON
-       ===================================================== */
+       GAME CARDS
+    ===================================================== */
 
-    const searchButton = document.querySelector(".search-btn");
+    const gameCards =
+        document.querySelectorAll(".game-card");
+
+    gameCards.forEach(card => {
+
+        card.addEventListener("click", () => {
+
+            const gameName =
+                card.querySelector("h3")?.textContent.trim();
+
+            openGameModal(gameName || "Game");
+
+        });
+
+    });
+
+
+    function openGameModal(gameName) {
+
+        closeModal();
+
+        const modal = document.createElement("div");
+
+        modal.className = "toon-modal";
+
+        modal.innerHTML = `
+            <div class="toon-modal-overlay"></div>
+
+            <div class="toon-modal-box">
+
+                <button class="toon-modal-close">
+                    ×
+                </button>
+
+                <div class="toon-modal-icon">
+                    🎮
+                </div>
+
+                <span>03TOON TIME FUN ZONE</span>
+
+                <h2>${gameName}</h2>
+
+                <p>
+                    Get ready to play! This game is coming soon.
+                </p>
+
+                <button class="toon-watch-button">
+                    Let's Play!
+                </button>
+
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.body.style.overflow = "hidden";
+
+        modal
+            .querySelector(".toon-modal-close")
+            .addEventListener("click", closeModal);
+
+        modal
+            .querySelector(".toon-modal-overlay")
+            .addEventListener("click", closeModal);
+
+        modal
+            .querySelector(".toon-watch-button")
+            .addEventListener("click", () => {
+
+                alert(
+                    `${gameName} will be available soon!`
+                );
+
+            });
+
+    }
+
+
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    const searchButton =
+        document.querySelector(".search-btn");
 
     if (searchButton) {
 
         searchButton.addEventListener("click", () => {
 
             const searchTerm = prompt(
-                "🔍 What are you looking for?\n\nTry: Kai, Meera, Tofu, Finn, Skybound Academy..."
+                "What would you like to find on 03TOON TIME?"
             );
 
-            if (!searchTerm) {
-                return;
-            }
+            if (!searchTerm) return;
 
-            const search = searchTerm.toLowerCase().trim();
+            const term = searchTerm.toLowerCase();
 
-            const searchableElements = document.querySelectorAll(
-                ".show-card, .character-card, .episode-card"
+            const sections = document.querySelectorAll(
+                "section, article"
             );
 
-            let foundElement = null;
+            let found = false;
 
-            searchableElements.forEach(element => {
+            sections.forEach(element => {
 
-                const text = element.textContent.toLowerCase();
+                if (
+                    element.textContent
+                        .toLowerCase()
+                        .includes(term)
+                ) {
 
-                if (!foundElement && text.includes(search)) {
-                    foundElement = element;
+                    if (!found) {
+
+                        element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+
+                        found = true;
+
+                    }
+
                 }
 
             });
 
-
-            if (foundElement) {
-
-                foundElement.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-                foundElement.classList.add("search-highlight");
-
-                setTimeout(() => {
-                    foundElement.classList.remove(
-                        "search-highlight"
-                    );
-                }, 2000);
-
-            } else {
+            if (!found) {
 
                 alert(
-                    `Sorry! We couldn't find "${searchTerm}". Try searching for a character or show name.`
+                    `Sorry! We couldn't find "${searchTerm}".`
                 );
 
             }
@@ -423,117 +501,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       12. VIEW ALL LINKS
-       ===================================================== */
-
-    document.querySelectorAll(".view-all").forEach(link => {
-
-        link.addEventListener("click", event => {
-
-            event.preventDefault();
-
-            const text = link.textContent.toLowerCase();
-
-            if (text.includes("shows")) {
-
-                document.querySelector("#shows")
-                    ?.scrollIntoView({
-                        behavior: "smooth"
-                    });
-
-            } else if (text.includes("characters")) {
-
-                document.querySelector("#characters")
-                    ?.scrollIntoView({
-                        behavior: "smooth"
-                    });
-
-            }
-
-        });
-
-    });
-
-
-    /* =====================================================
-       13. FUN ZONE GAME CARDS
-       ===================================================== */
-
-    const gameCards = document.querySelectorAll(".game-card");
-
-    gameCards.forEach(card => {
-
-        card.addEventListener("click", () => {
-
-            const titleElement = card.querySelector("h3");
-
-            const title = titleElement
-                ? titleElement.textContent.trim()
-                : "Fun Game";
-
-            openModal(
-                title,
-                "This mini-game is coming soon! Get ready for some serious cartoon fun."
-            );
-
-        });
-
-    });
-
-
-    /* =====================================================
-       14. SCROLL REVEAL ANIMATION
-       ===================================================== */
+       SCROLL REVEAL
+    ===================================================== */
 
     const revealElements = document.querySelectorAll(
         ".show-card, .character-card, .episode-card, .game-card, .about-container"
     );
 
+    if ("IntersectionObserver" in window) {
 
-    const observer = new IntersectionObserver(
-        entries => {
+        const observer = new IntersectionObserver(
+            (entries, observer) => {
 
-            entries.forEach(entry => {
+                entries.forEach(entry => {
 
-                if (entry.isIntersecting) {
+                    if (entry.isIntersecting) {
 
-                    entry.target.classList.add(
-                        "reveal-visible"
-                    );
+                        entry.target.classList.add(
+                            "reveal-visible"
+                        );
 
-                    observer.unobserve(entry.target);
+                        observer.unobserve(entry.target);
 
-                }
+                    }
 
-            });
+                });
 
-        },
-        {
-            threshold: 0.12
-        }
-    );
+            },
+            {
+                threshold: 0.1
+            }
+        );
 
+        revealElements.forEach(element => {
 
-    revealElements.forEach(element => {
+            element.classList.add("reveal-hidden");
 
-        element.classList.add("reveal-hidden");
+            observer.observe(element);
 
-        observer.observe(element);
+        });
 
-    });
+    }
 
 
     /* =====================================================
-       15. NAVBAR SHADOW ON SCROLL
-       ===================================================== */
+       NAVBAR SCROLL EFFECT
+    ===================================================== */
+
+    const navbar =
+        document.querySelector(".navbar");
 
     window.addEventListener("scroll", () => {
 
-        if (!navbar) {
-            return;
-        }
+        if (!navbar) return;
 
-        if (window.scrollY > 50) {
+        if (window.scrollY > 30) {
 
             navbar.classList.add("scrolled");
 
@@ -547,41 +569,88 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       16. MARQUEE PAUSE ON HOVER
-       ===================================================== */
+       MARQUEE PAUSE ON HOVER
+    ===================================================== */
 
-    const marquee = document.querySelector(".marquee");
+    const marquee =
+        document.querySelector(".marquee");
 
-    if (marquee) {
+    const marqueeContent =
+        document.querySelector(".marquee-content");
+
+    if (marquee && marqueeContent) {
 
         marquee.addEventListener("mouseenter", () => {
-            marquee.style.animationPlayState = "paused";
+            marqueeContent.style.animationPlayState = "paused";
         });
 
         marquee.addEventListener("mouseleave", () => {
-            marquee.style.animationPlayState = "running";
+            marqueeContent.style.animationPlayState = "running";
         });
 
     }
 
 
     /* =====================================================
-       17. CURRENT YEAR IN FOOTER
-       ===================================================== */
+       CURRENT YEAR
+    ===================================================== */
 
-    const footerYear = document.querySelector(".footer-year");
+    const footerYear =
+        document.querySelector(".footer-bottom p");
 
     if (footerYear) {
 
-        footerYear.textContent = new Date()
-            .getFullYear();
+        footerYear.innerHTML =
+            footerYear.innerHTML.replace(
+                "2026",
+                new Date().getFullYear()
+            );
 
     }
 
 
-    console.log(
-        "🎨 03TOON TIME loaded successfully!"
-    );
+    /* =====================================================
+       ACTIVE NAVIGATION
+    ===================================================== */
+
+    const sections =
+        document.querySelectorAll("section[id]");
+
+    const navigationLinks =
+        document.querySelectorAll(
+            ".nav-links a"
+        );
+
+    window.addEventListener("scroll", () => {
+
+        let currentSection = "";
+
+        sections.forEach(section => {
+
+            const sectionTop =
+                section.offsetTop - 150;
+
+            if (window.scrollY >= sectionTop) {
+                currentSection = section.id;
+            }
+
+        });
+
+        navigationLinks.forEach(link => {
+
+            link.classList.remove("active");
+
+            if (
+                link.getAttribute("href") ===
+                `#${currentSection}`
+            ) {
+
+                link.classList.add("active");
+
+            }
+
+        });
+
+    });
 
 });
-
